@@ -321,8 +321,8 @@ export default function ProfileDrawer({
                     >
                       <option value="Audira Aurum">Audira Aurum</option>
                       <option value="Audira Zenith">Audira Zenith</option>
-                      <option value="Audira Vankyo">Audira Vankyo</option>
-                      <option value="Audira Beoplay">Audira Beoplay</option>
+                      <option value="Audira Vela">Audira Vela</option>
+                      <option value="Audira Solace">Audira Solace</option>
                       <option value="Audira Q20">Audira Q20</option>
                     </select>
                   </div>

@@ -21,6 +21,8 @@ export default function SpatialAudio() {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const osc1Ref = useRef<OscillatorNode | null>(null);
   const osc2Ref = useRef<OscillatorNode | null>(null);
+  const osc3Ref = useRef<OscillatorNode | null>(null);
+  const filterRef = useRef<BiquadFilterNode | null>(null);
   const pannerRef = useRef<StereoPannerNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
 
@@ -37,19 +39,31 @@ export default function SpatialAudio() {
       gainNode.gain.setValueAtTime(0, ctx.currentTime); // Start silent
       gainNodeRef.current = gainNode;
 
-      // 2. Create a low base hum (sub-frequency for depth)
+      // 2. Create a biquad lowpass filter for sound sweeping depth
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.Q.setValueAtTime(1.5, ctx.currentTime);
+      filterRef.current = filter;
+
+      // 3. Create a low base hum (sub-frequency for depth)
       const osc1 = ctx.createOscillator();
       osc1.type = 'sine';
       osc1.frequency.setValueAtTime(55, ctx.currentTime); // A1 hum
       osc1Ref.current = osc1;
 
-      // 3. Create a harmonic ambient oscillator
+      // 4. Create a harmonic ambient oscillator
       const osc2 = ctx.createOscillator();
       osc2.type = 'triangle';
       osc2.frequency.setValueAtTime(220, ctx.currentTime); // A3 ambient pad
       osc2Ref.current = osc2;
 
-      // 4. Create a stereo panner node to swing sound left <-> right
+      // 5. Create a secondary perfect fifth harmonic oscillator
+      const osc3 = ctx.createOscillator();
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(330, ctx.currentTime); // E4 perfect fifth pad
+      osc3Ref.current = osc3;
+
+      // 6. Create a stereo panner node to swing sound left <-> right
       let panner: StereoPannerNode;
       if (ctx.createStereoPanner) {
         panner = ctx.createStereoPanner();
@@ -59,9 +73,12 @@ export default function SpatialAudio() {
         panner = ctx.createGain() as any;
       }
 
-      // Connect nodes: Osc -> Gain -> Panner -> Destination
-      osc1.connect(gainNode);
-      osc2.connect(gainNode);
+      // Connect nodes: Oscs -> Filter -> Gain -> Panner -> Destination
+      osc1.connect(filter);
+      osc2.connect(filter);
+      osc3.connect(filter);
+      
+      filter.connect(gainNode);
       
       if (pannerRef.current) {
         gainNode.connect(panner);
@@ -73,21 +90,33 @@ export default function SpatialAudio() {
       // Start oscillators
       osc1.start();
       osc2.start();
+      osc3.start();
 
-      // Slow LFO for spatial panning
-      let lastTime = ctx.currentTime;
+      // Slow LFO for spatial panning & filter sweeps
       const panLfo = () => {
         if (!audioCtxRef.current || audioCtxRef.current.state === 'suspended') return;
         const now = audioCtxRef.current.currentTime;
-        const panValue = Math.sin(now * 0.7); // Swing back & forth
+        
+        // Panner swing
+        const panValue = Math.sin(now * 0.6); // swing back & forth
         if (pannerRef.current && pannerRef.current.pan) {
           pannerRef.current.pan.setValueAtTime(panValue, now);
         }
         
-        // Dynamic filter sweep (slight pitch modulation on osc2)
+        // Lowpass filter frequency sweep (modulating between 400Hz and 1100Hz)
+        if (filterRef.current) {
+          const filterCutoff = 750 + Math.sin(now * 0.3) * 350;
+          filterRef.current.frequency.setValueAtTime(filterCutoff, now);
+        }
+
+        // Slight frequency drift for natural organic sound
         if (osc2Ref.current) {
-          const pitchSweep = 220 + Math.sin(now * 0.5) * 5;
-          osc2Ref.current.frequency.setValueAtTime(pitchSweep, now);
+          const pitchDrift = 220 + Math.sin(now * 0.4) * 4;
+          osc2Ref.current.frequency.setValueAtTime(pitchDrift, now);
+        }
+        if (osc3Ref.current) {
+          const pitchDrift = 330 + Math.cos(now * 0.5) * 5;
+          osc3Ref.current.frequency.setValueAtTime(pitchDrift, now);
         }
 
         requestAnimationFrame(panLfo);
@@ -125,10 +154,10 @@ export default function SpatialAudio() {
         ctx.resume();
       }
       setIsPlaying(true);
-      // Fade in volume smoothly
+      // Fade in volume smoothly to a clear 15% level
       if (gainNodeRef.current) {
         gainNodeRef.current.gain.setValueAtTime(0, ctx.currentTime);
-        gainNodeRef.current.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.5); // Master volume at 8%
+        gainNodeRef.current.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.5); // Master volume at 15%
       }
     }
   };
@@ -166,6 +195,36 @@ export default function SpatialAudio() {
       const centerY = height / 2;
 
       ctx.clearRect(0, 0, width, height);
+
+      // Draw horizontal soundscape background wave lines
+      const backgroundWaveCount = 3;
+      const backgroundWaveColors = [
+        'rgba(226, 122, 63, 0.12)', // glowing orange
+        'rgba(255, 255, 255, 0.05)', // glowing white
+        'rgba(226, 122, 63, 0.04)', // subtle orange
+      ];
+
+      ctx.save();
+      for (let w = 0; w < backgroundWaveCount; w++) {
+        ctx.beginPath();
+        const speed = isPlaying ? 0.003 : 0.0006;
+        const amplitude = isPlaying ? 28 - w * 6 : 4;
+        const frequency = 0.007 + w * 0.003;
+        const phaseOffset = Date.now() * speed + w * 2.0;
+
+        for (let x = 0; x < width; x++) {
+          const y = centerY + Math.sin(x * frequency + phaseOffset) * amplitude;
+          if (x === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.strokeStyle = backgroundWaveColors[w];
+        ctx.lineWidth = w === 0 ? 3 : 1.5;
+        ctx.stroke();
+      }
+      ctx.restore();
 
       const maxRadius = Math.min(width, height) / 1.1;
 

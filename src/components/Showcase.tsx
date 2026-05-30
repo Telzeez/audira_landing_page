@@ -100,6 +100,7 @@ export default function Showcase({ onAddToBasket }: ShowcaseProps) {
           <div className={styles.priceRow}>
             <span className={styles.currentPrice}>$95.00</span>
             <span className={styles.originalPrice}>$150.00</span>
+            <span className={styles.priceSeparator}>—</span>
             <span className={styles.discount}>36% OFF</span>
           </div>
 

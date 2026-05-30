@@ -29,8 +29,8 @@ const products: Product[] = [
     category: 'Over-Ear',
   },
   {
-    id: 'vankyo',
-    name: 'Audira Vankyo',
+    id: 'vela',
+    name: 'Audira Vela',
     price: '$109.00',
     priceNum: 109.00,
     rating: 4,
@@ -38,8 +38,8 @@ const products: Product[] = [
     category: 'In-Ear',
   },
   {
-    id: 'beoplay',
-    name: 'Audira Beoplay',
+    id: 'solace',
+    name: 'Audira Solace',
     price: '$249.00',
     priceNum: 249.00,
     rating: 5,

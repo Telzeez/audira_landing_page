@@ -1,7 +1,50 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './Hero.module.css';
+
+function SlotCounter({ numStr }: { numStr: string }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <span className={styles.slotContainer}>
+      {numStr.split('').map((char, index) => {
+        const isDigit = /\d/.test(char);
+        if (!isDigit) {
+          return <span key={index}>{char}</span>;
+        }
+
+        const targetDigit = parseInt(char, 10);
+        const offset = mounted ? -targetDigit * 10 : 0; // percentage vertical offset (10% per digit height)
+
+        return (
+          <span key={index} className={styles.slotDigitWrapper}>
+            <span
+              className={styles.slotDigitList}
+              style={{
+                transform: `translateY(${offset}%)`,
+                transition: `transform 2s cubic-bezier(0.16, 1, 0.3, 1)`,
+                transitionDelay: `${index * 60}ms`,
+              }}
+            >
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+                <span key={digit} className={styles.slotDigit}>
+                  {digit}
+                </span>
+              ))}
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 
 export default function Hero() {
   const scrollToProducts = () => {
@@ -23,6 +66,9 @@ export default function Hero() {
           <p className={styles.desc}>
             Hybrid Active Noise Cancelling Headphones, Designed To Deliver Pure Audio And Deep Immersion Wherever You Are. Equipped With Advanced Hybrid ANC Technology.
           </p>
+          <button className={`btn-primary ${styles.heroCta}`} onClick={scrollToProducts}>
+            Explore Q20
+          </button>
         </div>
 
         <div className={styles.barcodeWrapper}>
@@ -67,7 +113,7 @@ export default function Hero() {
             <rect x="155" width="2" height="40" />
             <rect x="159" width="1" height="40" />
           </svg>
-          <div className={styles.barcodeText}>(01)01234567890123</div>
+          <div className={styles.barcodeText}>(01)<SlotCounter numStr="01234567890123" /></div>
         </div>
       </div>
 
@@ -131,7 +177,7 @@ export default function Hero() {
             </span>
             <div className={styles.specText}>
               Fast Charging
-              <span className={styles.specVal}>Support 35 Volts</span>
+              <span className={styles.specVal}>5V / 2A (10W) Fast Charge</span>
             </div>
           </div>
         </div>

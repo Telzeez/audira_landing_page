@@ -1,5 +1,6 @@
+/* Base styles (unchanged except for fluid improvements) */
 .section {
-  padding: 100px 40px;
+  padding: clamp(3rem, 8vw, 6.25rem) clamp(1rem, 5vw, 2.5rem);
   background: #070707;
   position: relative;
   overflow: hidden;
@@ -9,13 +10,13 @@
 .grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  gap: 60px;
+  gap: clamp(2rem, 6vw, 3.75rem);
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-/* Left Side Styling */
+/* Left Side */
 .offerText {
   display: flex;
   flex-direction: column;
@@ -30,16 +31,17 @@
   border-radius: 20px;
   font-family: var(--font-outfit);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 16px;
   border: 1px solid rgba(226, 122, 63, 0.15);
+  white-space: nowrap;
 }
 
 .title {
   font-family: var(--font-outfit);
-  font-size: 2.8rem;
+  font-size: clamp(1.8rem, 6vw, 2.8rem);
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 16px;
@@ -51,16 +53,19 @@
 }
 
 .desc {
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
   line-height: 1.6;
   color: var(--text-secondary);
   margin-bottom: 40px;
   max-width: 500px;
 }
 
+/* Timer */
 .timer {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.5rem, 3vw, 1.25rem);
   margin-bottom: 40px;
 }
 
@@ -68,19 +73,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 80px;
+  min-width: clamp(60px, 15vw, 80px);
 }
 
 .timeNum {
   font-family: var(--font-outfit);
-  font-size: 3rem;
+  font-size: clamp(1.8rem, 6vw, 3rem);
   font-weight: 800;
   color: #ffffff;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  width: 80px;
-  height: 80px;
+  width: clamp(60px, 15vw, 80px);
+  height: clamp(60px, 15vw, 80px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,15 +93,18 @@
   transition: var(--transition-fast);
 }
 
-.timeBox:hover .timeNum {
-  border-color: var(--accent-color);
-  box-shadow: var(--glow-shadow);
-  transform: translateY(-2px);
+/* Only apply hover effects on devices that support hover */
+@media (hover: hover) {
+  .timeBox:hover .timeNum {
+    border-color: var(--accent-color);
+    box-shadow: var(--glow-shadow);
+    transform: translateY(-2px);
+  }
 }
 
 .timeLabel {
   font-family: var(--font-outfit);
-  font-size: 0.8rem;
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
   font-weight: 600;
   text-transform: uppercase;
   color: var(--text-secondary);
@@ -106,20 +114,22 @@
 
 .separator {
   font-family: var(--font-outfit);
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
   font-weight: 700;
   color: var(--accent-color);
   align-self: center;
-  margin-bottom: 24px;
+  line-height: 1;
+  margin-bottom: 0;
+  padding-bottom: 0.5rem; /* aligns with timeBox baseline */
 }
 
 .ctaBtn {
   align-self: flex-start;
-  padding: 14px 36px;
-  font-size: 1rem;
+  padding: 12px 24px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
-/* Right Side Styling */
+/* Right Side */
 .imageArea {
   position: relative;
   width: 100%;
@@ -127,7 +137,7 @@
   border-radius: 24px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
 }
 
 .offerImage {
@@ -135,28 +145,31 @@
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.imageArea:hover .offerImage {
-  transform: scale(1.04);
+@media (hover: hover) {
+  .imageArea:hover .offerImage {
+    transform: scale(1.04);
+  }
 }
 
 .bestOfferBadge {
   position: absolute;
-  top: 30px;
-  right: 30px;
+  top: clamp(1rem, 4vw, 1.875rem);
+  right: clamp(1rem, 4vw, 1.875rem);
   background: var(--accent-gradient);
   color: #ffffff;
-  padding: 8px 18px;
+  padding: 6px 14px;
   border-radius: 30px;
   font-family: var(--font-outfit);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   box-shadow: 0 8px 20px rgba(226, 122, 63, 0.4);
   z-index: 2;
+  white-space: nowrap;
 }
 
-/* Mobile responsive */
+/* ========== TABLET (max-width: 968px) ========== */
 @media (max-width: 968px) {
   .grid {
     grid-template-columns: 1fr;
@@ -166,6 +179,9 @@
   .imageArea {
     aspect-ratio: 1.2;
     order: -1;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
   }
   
   .ctaBtn {
@@ -180,29 +196,136 @@
     align-items: center;
     text-align: center;
   }
+  
+  /* Fix badge alignment on tablet/mobile */
+  .badge {
+    align-self: center;
+  }
+  
+  .desc {
+    max-width: 100%;
+  }
 }
 
+/* ========== MOBILE L (max-width: 768px) ========== */
 @media (max-width: 768px) {
   .section {
-    padding: 60px 24px;
+    padding: 60px 20px;
   }
   
   .title {
-    font-size: 2.2rem;
+    margin-bottom: 12px;
   }
   
+  .desc {
+    margin-bottom: 30px;
+  }
+  
+  /* Timer spacing */
   .timer {
-    gap: 10px;
-  }
-  
-  .timeNum {
-    width: 65px;
-    height: 65px;
-    font-size: 2.2rem;
+    gap: 8px;
   }
   
   .separator {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
+    padding-bottom: 0.25rem;
+  }
+  
+  /* CTA button full width on smaller screens? optional */
+  .ctaBtn {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* ========== MOBILE M (max-width: 550px) ========== */
+@media (max-width: 550px) {
+  .timer {
+    gap: 4px;
+  }
+  
+  .timeBox {
+    min-width: 55px;
+  }
+  
+  .timeNum {
+    width: 55px;
+    height: 55px;
+    font-size: 1.6rem;
+    border-radius: 10px;
+  }
+  
+  .timeLabel {
+    font-size: 0.65rem;
+    margin-top: 4px;
+  }
+  
+  .separator {
+    font-size: 1.4rem;
+  }
+  
+  .bestOfferBadge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    white-space: normal;  /* allow wrap on tiny screens */
+    text-align: center;
+    line-height: 1.2;
+  }
+}
+
+/* ========== MOBILE S (max-width: 400px) ========== */
+@media (max-width: 400px) {
+  .section {
+    padding: 40px 16px;
+  }
+  
+  .badge {
+    font-size: 0.7rem;
+    padding: 4px 12px;
+  }
+  
+  .timer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .timeBox {
+    min-width: 70px;
+  }
+  
+  .timeNum {
+    width: 70px;
+    height: 70px;
+    font-size: 2rem;
+  }
+  
+  /* Hide separators on very narrow screens to save space */
+  .separator {
+    display: none;
+  }
+  
+  .bestOfferBadge {
+    top: 10px;
+    right: 10px;
+    font-size: 0.65rem;
+  }
+}
+
+/* ========== EXTRA SMALL (max-width: 340px) ========== */
+@media (max-width: 340px) {
+  .timeBox {
+    min-width: 55px;
+  }
+  
+  .timeNum {
+    width: 55px;
+    height: 55px;
+    font-size: 1.5rem;
+  }
+  
+  .ctaBtn {
+    padding: 10px 16px;
+    font-size: 0.8rem;
   }
 }

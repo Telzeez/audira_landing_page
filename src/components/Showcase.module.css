@@ -87,8 +87,8 @@
 
 .priceRow {
   display: flex;
-  align-items: baseline;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 24px;
 }
 
@@ -105,6 +105,13 @@
   font-weight: 500;
   color: var(--text-tertiary);
   text-decoration: line-through;
+}
+
+.priceSeparator {
+  font-family: var(--font-outfit);
+  font-size: 1.1rem;
+  color: var(--text-tertiary);
+  opacity: 0.5;
 }
 
 .discount {

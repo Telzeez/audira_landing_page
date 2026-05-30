@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './Navbar.module.css';
 
 interface NavbarProps {
@@ -14,6 +14,8 @@ export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarP
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState('EN');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,6 +33,22 @@ export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarP
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleLang = () => setIsLangOpen(!isLangOpen);
   const selectLang = (lang: string) => {
+    if (lang !== 'EN') {
+      const fullLangs: Record<string, string> = {
+        FR: 'French',
+        DE: 'German',
+        JP: 'Japanese'
+      };
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+      setToastMessage(`Coming Soon: ${fullLangs[lang] || lang} translation is under development.`);
+      toastTimerRef.current = setTimeout(() => {
+        setToastMessage(null);
+      }, 4000);
+      setIsLangOpen(false);
+      return;
+    }
     setSelectedLang(lang);
     setIsLangOpen(false);
   };
@@ -152,6 +170,17 @@ export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarP
           <span></span>
         </button>
       </div>
+
+      {toastMessage && (
+        <div className={styles.toast}>
+          <svg className={styles.toastIcon} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </nav>
   );
 }

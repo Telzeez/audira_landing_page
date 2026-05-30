@@ -247,3 +247,42 @@
     transform: translateY(-8px) rotate(-45deg);
   }
 }
+
+/* Premium Glassmorphic Language switch alert toast */
+.toast {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 122, 63, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(226, 122, 63, 0.15);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  font-family: var(--font-outfit);
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 10000;
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toastIcon {
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

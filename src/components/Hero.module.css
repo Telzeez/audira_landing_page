@@ -297,3 +297,58 @@
     align-items: center;
   }
 }
+
+/* Hero CTA button styling above the fold */
+.heroCta {
+  margin-top: 24px;
+  padding: 14px 32px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 30px;
+  cursor: pointer;
+  align-self: flex-start;
+  box-shadow: 0 4px 15px rgba(226, 122, 63, 0.25);
+  transition: var(--transition-smooth);
+}
+
+.heroCta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(226, 122, 63, 0.4);
+}
+
+/* Slot machine barcode digits styling */
+.slotContainer {
+  display: inline-flex;
+  overflow: hidden;
+  height: 1.2em;
+  align-items: center;
+  vertical-align: bottom;
+  line-height: 1;
+}
+
+.slotDigitWrapper {
+  position: relative;
+  width: 0.6em;
+  height: 1.2em;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.slotDigitList {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.slotDigit {
+  height: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+

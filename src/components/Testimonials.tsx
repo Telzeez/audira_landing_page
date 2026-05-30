@@ -43,7 +43,7 @@ const DEFAULT_TESTIMONIALS: Testimonial[] = [
     role: 'UX Designer',
     quote: 'The space-black finish with copper accents is simply gorgeous. They look like a piece of high-end jewelry and feel incredibly light on the head, even after hours of continuous wear.',
     rating: 5,
-    image: '/images/user_profile_1.png',
+    image: '/images/user_profile_3.png',
   },
 ];
 
