@@ -52,6 +52,7 @@ export default function Testimonials({ user, onOpenProfile }: TestimonialsProps)
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [canScroll, setCanScroll] = useState(false);
 
   // Form states
   const [rating, setRating] = useState(5);
@@ -62,6 +63,9 @@ export default function Testimonials({ user, onOpenProfile }: TestimonialsProps)
   const [formSuccess, setFormSuccess] = useState('');
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollTargetRef = useRef(0);
+  const isProgrammaticScrollRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchReviews = async () => {
     try {
@@ -81,54 +85,123 @@ export default function Testimonials({ user, onOpenProfile }: TestimonialsProps)
     fetchReviews();
   }, []);
 
+  // Check if scrolling is needed
+  useEffect(() => {
+    const checkScroll = () => {
+      if (scrollRef.current) {
+        const { scrollWidth, clientWidth } = scrollRef.current;
+        setCanScroll(scrollWidth > clientWidth);
+      }
+    };
+    checkScroll();
+    
+    // Add small delay to ensure DOM is fully rendered
+    const timeout = setTimeout(checkScroll, 200);
+
+    window.addEventListener('resize', checkScroll);
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [reviews]);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
+
   // Scroll handler to sync dots
   const handleScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft } = scrollRef.current;
-      // Sync dot indicator index (each card is 400px width + 30px gap = 430px)
-      const index = Math.round(scrollLeft / 430);
+      
+      const firstCard = scrollRef.current.firstElementChild as HTMLElement;
+      const cardWidth = firstCard ? firstCard.offsetWidth + 30 : 430;
+      
+      // Sync dot indicator index
+      const index = Math.round(scrollLeft / cardWidth);
       if (index >= 0 && index < reviews.length) {
         setActiveIndex(index);
+      }
+
+      // If scroll was triggered manually by user, sync our scroll target ref
+      if (!isProgrammaticScrollRef.current) {
+        scrollTargetRef.current = scrollLeft;
       }
     }
   };
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const { scrollLeft, clientWidth, scrollWidth } = scrollRef.current;
+      const container = scrollRef.current;
+      const firstCard = container.firstElementChild as HTMLElement;
+      const step = firstCard ? firstCard.offsetWidth + 30 : 430; // card width + gap
+      
+      const { clientWidth, scrollWidth } = container;
       const maxScroll = scrollWidth - clientWidth;
       
-      let scrollTo = direction === 'left' 
-        ? scrollLeft - 430 
-        : scrollLeft + 430;
+      if (maxScroll <= 0) return;
+
+      let newTarget = direction === 'left' 
+        ? scrollTargetRef.current - step 
+        : scrollTargetRef.current + step;
       
-      if (direction === 'right' && scrollLeft >= maxScroll - 10) {
-        scrollTo = 0; // Wrap to start
-      } else if (direction === 'left' && scrollLeft <= 10) {
-        scrollTo = maxScroll; // Wrap to end
+      // Wrapping check with 15px threshold tolerance
+      if (direction === 'right' && scrollTargetRef.current >= maxScroll - 15) {
+        newTarget = 0;
+      } else if (direction === 'left' && scrollTargetRef.current <= 15) {
+        newTarget = maxScroll;
+      } else {
+        // Clamp target
+        newTarget = Math.max(0, Math.min(newTarget, maxScroll));
       }
       
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+      scrollTargetRef.current = newTarget;
+      
+      // Trigger programmatic scroll
+      isProgrammaticScrollRef.current = true;
+      container.scrollTo({ left: newTarget, behavior: 'smooth' });
+
+      // Reset the flag after smooth animation is completed
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+      }, 600);
     }
   };
 
   const scrollToCard = (index: number) => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({ left: index * 430, behavior: 'smooth' });
+      const container = scrollRef.current;
+      const firstCard = container.firstElementChild as HTMLElement;
+      const step = firstCard ? firstCard.offsetWidth + 30 : 430;
+      
+      const targetScroll = index * step;
+      scrollTargetRef.current = targetScroll;
+      
+      isProgrammaticScrollRef.current = true;
+      container.scrollTo({ left: targetScroll, behavior: 'smooth' });
       setActiveIndex(index);
+
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+      }, 600);
     }
   };
 
   // Autoplay functionality
   useEffect(() => {
-    if (isPaused || showForm || reviews.length <= 1) return;
+    if (isPaused || showForm || reviews.length <= 1 || !canScroll) return;
 
     const interval = setInterval(() => {
       scroll('right');
     }, 6000);
 
     return () => clearInterval(interval);
-  }, [isPaused, showForm, reviews]);
+  }, [isPaused, showForm, reviews, canScroll]);
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -335,16 +408,18 @@ export default function Testimonials({ user, onOpenProfile }: TestimonialsProps)
       {/* Slider controls & Pagination dots container */}
       <div className={styles.controlsContainer}>
         {/* Pagination Dots */}
-        <div className={styles.paginationDots}>
-          {reviews.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.dot} ${index === activeIndex ? styles.dotActive : ''}`}
-              onClick={() => scrollToCard(index)}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
+        {canScroll && (
+          <div className={styles.paginationDots}>
+            {reviews.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.dot} ${index === activeIndex ? styles.dotActive : ''}`}
+                onClick={() => scrollToCard(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Action button & Slide Nav arrows */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', maxWidth: '1200px', padding: '0 40px' }}>
@@ -355,18 +430,20 @@ export default function Testimonials({ user, onOpenProfile }: TestimonialsProps)
             {showForm ? 'Close Form' : 'Write a Review'}
           </button>
 
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button className={styles.navBtn} onClick={() => scroll('left')} aria-label="Previous testimonial">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-            <button className={styles.navBtn} onClick={() => scroll('right')} aria-label="Next testimonial">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-          </div>
+          {canScroll && (
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <button className={styles.navBtn} onClick={() => scroll('left')} aria-label="Previous testimonial">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <button className={styles.navBtn} onClick={() => scroll('right')} aria-label="Next testimonial">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>
