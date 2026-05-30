@@ -37,7 +37,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className={styles.footer}>
+    <footer id="support-footer" className={styles.footer}>
       <div className={styles.grid}>
         {/* Brand details */}
         <div className={styles.brandInfo}>

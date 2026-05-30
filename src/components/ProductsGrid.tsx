@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import styles from './ProductsGrid.module.css';
 
@@ -10,6 +11,7 @@ interface Product {
   priceNum: number;
   rating: number;
   image: string;
+  category: 'Over-Ear' | 'In-Ear' | 'Special Edition';
 }
 
 interface ProductsGridProps {
@@ -24,6 +26,7 @@ const products: Product[] = [
     priceNum: 129.00,
     rating: 5,
     image: '/images/product_aurum_blue.png',
+    category: 'Over-Ear',
   },
   {
     id: 'vankyo',
@@ -32,6 +35,7 @@ const products: Product[] = [
     priceNum: 109.00,
     rating: 4,
     image: '/images/product_aurum_charcoal.png',
+    category: 'In-Ear',
   },
   {
     id: 'beoplay',
@@ -40,10 +44,37 @@ const products: Product[] = [
     priceNum: 249.00,
     rating: 5,
     image: '/images/product_aurum_silver.png',
+    category: 'Special Edition',
+  },
+  {
+    id: 'studio',
+    name: 'Audira Studio',
+    price: '$189.00',
+    priceNum: 189.00,
+    rating: 4,
+    image: '/images/product_aurum_charcoal.png',
+    category: 'Over-Ear',
+  },
+  {
+    id: 'aurum-spec',
+    name: 'Audira Aurum Gold',
+    price: '$299.00',
+    priceNum: 299.00,
+    rating: 5,
+    image: '/images/product_aurum_copper.png',
+    category: 'Special Edition',
   },
 ];
 
+const categories = ['All', 'Over-Ear', 'In-Ear', 'Special Edition'] as const;
+
 export default function ProductsGrid({ onAddToCart }: ProductsGridProps) {
+  const [selectedCategory, setSelectedCategory] = useState<typeof categories[number]>('All');
+
+  const filteredProducts = selectedCategory === 'All' 
+    ? products 
+    : products.filter(p => p.category === selectedCategory);
+
   return (
     <section id="products-catalog" className={styles.section}>
       <div className={styles.header}>
@@ -60,9 +91,24 @@ export default function ProductsGrid({ onAddToCart }: ProductsGridProps) {
         </button>
       </div>
 
+      {/* Category Tabs Filter Bar */}
+      <div className={styles.filterBar}>
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            className={`${styles.filterTab} ${selectedCategory === cat ? styles.filterTabActive : ''}`}
+            onClick={() => setSelectedCategory(cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Products Grid */}
       <div className={styles.grid}>
-        {products.map((product) => (
-          <div key={product.id} className={styles.card}>
+        {filteredProducts.map((product) => (
+          /* key includes selectedCategory to force remount & animation triggers on filter changes */
+          <div key={`${selectedCategory}-${product.id}`} className={`${styles.card} ${styles.animateCard}`}>
             <div className={styles.imageWrapper}>
               <Image
                 src={product.image}

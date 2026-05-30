@@ -35,17 +35,34 @@ export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarP
     setIsLangOpen(false);
   };
 
+  const scrollToSection = (id: string) => {
+    setIsMenuOpen(false);
+    if (id === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const element = document.getElementById(id);
+      if (element) {
+        const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+        const offsetPosition = elementPosition - 80; // offset navbar height
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        });
+      }
+    }
+  };
+
   return (
     <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
-      <div className={styles.logo}>
+      <div className={styles.logo} onClick={() => scrollToSection('home')} style={{ cursor: 'pointer' }}>
         Audira<span className={styles.logoDot}>.</span>
       </div>
 
       <ul className={`${styles.navLinks} ${isMenuOpen ? styles.navLinksActive : ''}`}>
-        <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Home</li>
-        <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Products</li>
-        <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Technology</li>
-        <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Support</li>
+        <li className={styles.navLink} onClick={() => scrollToSection('home')}>Home</li>
+        <li className={styles.navLink} onClick={() => scrollToSection('products-catalog')}>Products</li>
+        <li className={styles.navLink} onClick={() => scrollToSection('technology-spatial')}>Technology</li>
+        <li className={styles.navLink} onClick={() => scrollToSection('support-footer')}>Support</li>
       </ul>
 
       <div className={styles.actions}>

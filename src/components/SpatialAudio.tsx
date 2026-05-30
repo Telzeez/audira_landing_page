@@ -239,7 +239,7 @@ export default function SpatialAudio() {
   }, [isPlaying]);
 
   return (
-    <section className={styles.section}>
+    <section id="technology-spatial" className={styles.section}>
       <div className={styles.grid}>
         {/* Left Column: Visual waves */}
         <div className={styles.visualWrapper}>
