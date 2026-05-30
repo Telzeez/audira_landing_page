@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import ProductsGrid from '@/components/ProductsGrid';
@@ -12,16 +12,47 @@ import Footer from '@/components/Footer';
 import CartDrawer, { CartItem } from '@/components/CartDrawer';
 import ProfileDrawer, { RegisteredDevice } from '@/components/ProfileDrawer';
 
+interface UserProfile {
+  name: string;
+  email: string;
+  points: number;
+}
+
 export default function Home() {
   // Cart state management
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Profile and Warranties state management
+  // Authenticated Profile state management
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [registeredDevices, setRegisteredDevices] = useState<RegisteredDevice[]>([]);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [registeredDevices, setRegisteredDevices] = useState<RegisteredDevice[]>([
-    { name: 'Audira Q20', serial: '(01)01234567890123' } // Pre-registered device
-  ]);
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
+
+  // Restore user session on mount
+  useEffect(() => {
+    async function restoreSession() {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user) {
+            setUser({
+              name: data.user.name,
+              email: data.user.email,
+              points: data.user.points,
+            });
+            setRegisteredDevices(data.user.registeredDevices || []);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to restore auth session:', err);
+      } finally {
+        setIsLoadingSession(false);
+      }
+    }
+    restoreSession();
+  }, []);
 
   const handleAddToCart = (newItem: { id: string; name: string; price: number; priceStr: string; image: string }) => {
     setCartItems((prevItems) => {
@@ -52,9 +83,25 @@ export default function Home() {
     setCartItems([]);
   };
 
-  // Register device handler
-  const handleRegisterDevice = (name: string, serial: string) => {
-    setRegisteredDevices((prev) => [...prev, { name, serial }]);
+  // Auth Callbacks
+  const handleLoginSuccess = (loggedInUser: UserProfile, devices: RegisteredDevice[]) => {
+    setUser(loggedInUser);
+    setRegisteredDevices(devices || []);
+  };
+
+  const handleLogoutSuccess = () => {
+    setUser(null);
+    setRegisteredDevices([]);
+  };
+
+  const handleRegisterDeviceSuccess = (devices: RegisteredDevice[], points: number) => {
+    setRegisteredDevices(devices);
+    if (user) {
+      setUser({
+        ...user,
+        points: points,
+      });
+    }
   };
 
   // Sum of quantities for cart indicator
@@ -91,8 +138,11 @@ export default function Home() {
       <ProfileDrawer
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+        user={user}
         registeredDevices={registeredDevices}
-        onRegisterDevice={handleRegisterDevice}
+        onLoginSuccess={handleLoginSuccess}
+        onLogoutSuccess={handleLogoutSuccess}
+        onRegisterDeviceSuccess={handleRegisterDeviceSuccess}
       />
     </>
   );

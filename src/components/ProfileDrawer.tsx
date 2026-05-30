@@ -8,71 +8,148 @@ export interface RegisteredDevice {
   serial: string;
 }
 
+interface UserProfile {
+  name: string;
+  email: string;
+  points: number;
+}
+
 interface ProfileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  user: UserProfile | null;
   registeredDevices: RegisteredDevice[];
-  onRegisterDevice: (name: string, serial: string) => void;
+  onLoginSuccess: (user: UserProfile, devices: RegisteredDevice[]) => void;
+  onLogoutSuccess: () => void;
+  onRegisterDeviceSuccess: (devices: RegisteredDevice[], points: number) => void;
 }
 
 export default function ProfileDrawer({
   isOpen,
   onClose,
+  user,
   registeredDevices,
-  onRegisterDevice,
+  onLoginSuccess,
+  onLogoutSuccess,
+  onRegisterDeviceSuccess,
 }: ProfileDrawerProps) {
-  // Guest state simulation
-  const [isGuest, setIsGuest] = useState(false);
-  const [userPoints, setUserPoints] = useState(120);
+  // Tab selector: 'signin' | 'signup'
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
 
-  // Form states
+  // Input states
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('Audira Aurum');
   const [serialCode, setSerialCode] = useState('');
-  const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [formMessage, setFormMessage] = useState('');
 
-  const handleRegister = (e: React.FormEvent) => {
+  // Form feedbacks
+  const [authStatus, setAuthStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [authMessage, setAuthMessage] = useState('');
+  const [regStatus, setRegStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [regMessage, setRegMessage] = useState('');
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthStatus('loading');
+    setAuthMessage('');
 
-    if (!serialCode.trim()) {
-      setFormStatus('error');
-      setFormMessage('Please enter a serial number.');
-      return;
+    const endpoint = activeTab === 'signin' ? '/api/auth/login' : '/api/auth/signup';
+    const payload = activeTab === 'signin' 
+      ? { email, password } 
+      : { name, email, password };
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setAuthStatus('error');
+        setAuthMessage(data.error || 'Authentication failed. Please check inputs.');
+        return;
+      }
+
+      setAuthStatus('success');
+      setAuthMessage(activeTab === 'signin' ? 'Successfully logged in.' : 'Account created!');
+      
+      // Clear inputs
+      setName('');
+      setEmail('');
+      setPassword('');
+
+      // Trigger callback
+      setTimeout(() => {
+        onLoginSuccess(data.user, data.user.registeredDevices);
+        setAuthStatus('idle');
+        setAuthMessage('');
+      }, 1000);
+    } catch (err) {
+      setAuthStatus('error');
+      setAuthMessage('A network error occurred. Please try again.');
     }
-
-    // Validate: Serial must be a barcode-like formatting starting with (01) or standard AUD- serial code
-    const isValid = serialCode.startsWith('(01)') || serialCode.toUpperCase().startsWith('AUD-') || serialCode.length >= 8;
-    if (!isValid) {
-      setFormStatus('error');
-      setFormMessage('Format invalid. Use barcode serial (01)... or AUD-... (min 8 chars).');
-      return;
-    }
-
-    // Check if already registered
-    const isAlreadyRegistered = registeredDevices.some(
-      (d) => d.serial.toLowerCase() === serialCode.trim().toLowerCase()
-    );
-    if (isAlreadyRegistered) {
-      setFormStatus('error');
-      setFormMessage('This device has already been registered.');
-      return;
-    }
-
-    // Register success
-    onRegisterDevice(selectedProduct, serialCode.trim());
-    setUserPoints((prev) => prev + 50); // Reward 50 points
-    setFormStatus('success');
-    setFormMessage(`Success! Registered. +50 Club Points!`);
-    setSerialCode('');
-
-    setTimeout(() => {
-      setFormStatus('idle');
-      setFormMessage('');
-    }, 4000);
   };
 
-  const handleSignOutToggle = () => {
-    setIsGuest(!isGuest);
+  const handleRegisterDevice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!serialCode.trim()) {
+      setRegStatus('error');
+      setRegMessage('Please enter a serial number.');
+      return;
+    }
+
+    setRegStatus('loading');
+    setRegMessage('');
+
+    try {
+      const response = await fetch('/api/auth/register-device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deviceName: selectedProduct,
+          serial: serialCode.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setRegStatus('error');
+        setRegMessage(data.error || 'Failed to register device.');
+        return;
+      }
+
+      setRegStatus('success');
+      setRegMessage('Success! Registered. +50 Club Points!');
+      setSerialCode('');
+
+      // Trigger callback
+      onRegisterDeviceSuccess(data.registeredDevices, data.points);
+
+      setTimeout(() => {
+        setRegStatus('idle');
+        setRegMessage('');
+      }, 4000);
+    } catch (err) {
+      setRegStatus('error');
+      setRegMessage('A network error occurred.');
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      if (response.ok) {
+        onLogoutSuccess();
+        onClose();
+      }
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
   };
 
   return (
@@ -96,38 +173,112 @@ export default function ProfileDrawer({
         </div>
 
         <div className={styles.body}>
-          {isGuest ? (
-            /* Guest Panel State */
-            <div className={styles.guestMessage}>
-              <svg 
-                style={{ color: 'var(--text-tertiary)', marginBottom: '20px' }}
-                xmlns="http://www.w3.org/2000/svg" 
-                width="64" 
-                height="64" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="1.5" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              <h4 style={{ color: '#ffffff', marginBottom: '10px', fontFamily: 'var(--font-outfit)' }}>Welcome, Guest</h4>
-              <p>Sign in to register devices, activate your luxury warranties, and claim reward club points.</p>
-              <button 
-                className="btn-primary" 
-                style={{ marginTop: '30px', width: '100%' }}
-                onClick={handleSignOutToggle}
-              >
-                Sign In / Join Club
-              </button>
+          {!user ? (
+            /* Logged Out: Sign In / Sign Up Forms */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', gap: '20px' }}>
+                <button 
+                  onClick={() => { setActiveTab('signin'); setAuthMessage(''); }} 
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: activeTab === 'signin' ? '#ffffff' : 'var(--text-secondary)',
+                    fontFamily: 'var(--font-outfit)',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    paddingBottom: '8px'
+                  }}
+                >
+                  Sign In
+                  {activeTab === 'signin' && (
+                    <span style={{ position: 'absolute', bottom: '-11px', left: 0, width: '100%', height: '2px', background: 'var(--accent-color)' }} />
+                  )}
+                </button>
+                <button 
+                  onClick={() => { setActiveTab('signup'); setAuthMessage(''); }} 
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: activeTab === 'signup' ? '#ffffff' : 'var(--text-secondary)',
+                    fontFamily: 'var(--font-outfit)',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    paddingBottom: '8px'
+                  }}
+                >
+                  Join Club
+                  {activeTab === 'signup' && (
+                    <span style={{ position: 'absolute', bottom: '-11px', left: 0, width: '100%', height: '2px', background: 'var(--accent-color)' }} />
+                  )}
+                </button>
+              </div>
+
+              <form className={styles.form} onSubmit={handleAuthSubmit}>
+                {activeTab === 'signup' && (
+                  <div className={styles.inputGroup}>
+                    <label className={styles.inputLabel} htmlFor="name-input">Full Name</label>
+                    <input 
+                      id="name-input"
+                      type="text" 
+                      className={styles.input} 
+                      placeholder="e.g. Alexander Croft"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+                
+                <div className={styles.inputGroup}>
+                  <label className={styles.inputLabel} htmlFor="email-input">Email Address</label>
+                  <input 
+                    id="email-input"
+                    type="email" 
+                    className={styles.input} 
+                    placeholder="e.g. croft@audira.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label className={styles.inputLabel} htmlFor="password-input">Password</label>
+                  <input 
+                    id="password-input"
+                    type="password" 
+                    className={styles.input} 
+                    placeholder="Min 6 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  className={`btn-primary ${styles.submitBtn}`}
+                  disabled={authStatus === 'loading'}
+                  style={{ marginTop: '10px' }}
+                >
+                  {authStatus === 'loading' ? 'Processing...' : activeTab === 'signin' ? 'Sign In' : 'Create Account'}
+                </button>
+
+                {authStatus !== 'idle' && authStatus !== 'loading' && (
+                  <div className={`${styles.formMessage} ${authStatus === 'success' ? styles.messageSuccess : styles.messageError}`}>
+                    {authMessage}
+                  </div>
+                )}
+              </form>
             </div>
           ) : (
-            /* Member Panel State */
+            /* Logged In Member details */
             <>
-              {/* Profile details */}
+              {/* Profile user details */}
               <div className={styles.userCard}>
                 <div className={styles.avatar}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -136,15 +287,17 @@ export default function ProfileDrawer({
                   </svg>
                 </div>
                 <div className={styles.userInfo}>
-                  <span className={styles.userName}>Alexander Croft</span>
-                  <span className={styles.userTier}>Gold Member Tier</span>
+                  <span className={styles.userName}>{user.name}</span>
+                  <span className={styles.userTier}>
+                    {user.points >= 200 ? 'Platinum Member Tier' : 'Gold Member Tier'}
+                  </span>
                 </div>
               </div>
 
               {/* Stats Box */}
               <div className={styles.statsRow}>
                 <div className={styles.statBox}>
-                  <div className={styles.statVal}>{userPoints}</div>
+                  <div className={styles.statVal}>{user.points}</div>
                   <div className={styles.statLabel}>Club Points</div>
                 </div>
                 <div className={styles.statBox}>
@@ -156,11 +309,11 @@ export default function ProfileDrawer({
               {/* Product registration form */}
               <div>
                 <h4 className={styles.sectionTitle}>Register a Device</h4>
-                <form className={styles.form} onSubmit={handleRegister}>
+                <form className={styles.form} onSubmit={handleRegisterDevice}>
                   <div className={styles.inputGroup}>
-                    <label className={styles.inputLabel} htmlFor="product-select">Select Model</label>
+                    <label className={styles.inputLabel} htmlFor="product-select-drawer">Select Model</label>
                     <select 
-                      id="product-select"
+                      id="product-select-drawer"
                       className={styles.input} 
                       style={{ background: '#0e0e0e', color: '#ffffff' }}
                       value={selectedProduct}
@@ -174,9 +327,9 @@ export default function ProfileDrawer({
                     </select>
                   </div>
                   <div className={styles.inputGroup}>
-                    <label className={styles.inputLabel} htmlFor="serial-input">Serial Code</label>
+                    <label className={styles.inputLabel} htmlFor="serial-input-drawer">Serial Code</label>
                     <input 
-                      id="serial-input"
+                      id="serial-input-drawer"
                       type="text" 
                       className={styles.input} 
                       placeholder="e.g. (01)01234567890123"
@@ -184,12 +337,16 @@ export default function ProfileDrawer({
                       onChange={(e) => setSerialCode(e.target.value)}
                     />
                   </div>
-                  <button type="submit" className={`btn-primary ${styles.submitBtn}`}>
-                    Verify & Register
+                  <button 
+                    type="submit" 
+                    className={`btn-primary ${styles.submitBtn}`}
+                    disabled={regStatus === 'loading'}
+                  >
+                    {regStatus === 'loading' ? 'Registering...' : 'Verify & Register'}
                   </button>
-                  {formStatus !== 'idle' && (
-                    <div className={`${styles.formMessage} ${formStatus === 'success' ? styles.messageSuccess : styles.messageError}`}>
-                      {formMessage}
+                  {regStatus !== 'idle' && regStatus !== 'loading' && (
+                    <div className={`${styles.formMessage} ${regStatus === 'success' ? styles.messageSuccess : styles.messageError}`}>
+                      {regMessage}
                     </div>
                   )}
                 </form>
@@ -229,9 +386,15 @@ export default function ProfileDrawer({
 
         {/* Bottom Drawer Options */}
         <div className={styles.footer}>
-          <button className="btn-secondary" style={{ width: '100%', borderRadius: '30px' }} onClick={handleSignOutToggle}>
-            {isGuest ? 'Log In as Croft' : 'Sign Out'}
-          </button>
+          {user ? (
+            <button className="btn-secondary" style={{ width: '100%', borderRadius: '30px' }} onClick={handleSignOut}>
+              Sign Out
+            </button>
+          ) : (
+            <div style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', textAlign: 'center' }}>
+              Audira Club Membership. Louder Than Luxury.
+            </div>
+          )}
         </div>
       </div>
     </>
