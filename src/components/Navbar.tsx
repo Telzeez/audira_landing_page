@@ -6,9 +6,10 @@ import styles from './Navbar.module.css';
 interface NavbarProps {
   cartCount: number;
   onOpenCart: () => void;
+  onOpenProfile: () => void;
 }
 
-export default function Navbar({ cartCount, onOpenCart }: NavbarProps) {
+export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -44,7 +45,6 @@ export default function Navbar({ cartCount, onOpenCart }: NavbarProps) {
         <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Home</li>
         <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Products</li>
         <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Technology</li>
-        <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Learn</li>
         <li className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Support</li>
       </ul>
 
@@ -108,7 +108,7 @@ export default function Navbar({ cartCount, onOpenCart }: NavbarProps) {
           {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
         </button>
 
-        <div className={styles.avatar} aria-label="Profile">
+        <div className={styles.avatar} onClick={onOpenProfile} aria-label="Profile">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"

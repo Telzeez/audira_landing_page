@@ -10,10 +10,18 @@ import SpatialAudio from '@/components/SpatialAudio';
 import Testimonials from '@/components/Testimonials';
 import Footer from '@/components/Footer';
 import CartDrawer, { CartItem } from '@/components/CartDrawer';
+import ProfileDrawer, { RegisteredDevice } from '@/components/ProfileDrawer';
 
 export default function Home() {
+  // Cart state management
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Profile and Warranties state management
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [registeredDevices, setRegisteredDevices] = useState<RegisteredDevice[]>([
+    { name: 'Audira Q20', serial: '(01)01234567890123' } // Pre-registered device
+  ]);
 
   const handleAddToCart = (newItem: { id: string; name: string; price: number; priceStr: string; image: string }) => {
     setCartItems((prevItems) => {
@@ -44,12 +52,21 @@ export default function Home() {
     setCartItems([]);
   };
 
+  // Register device handler
+  const handleRegisterDevice = (name: string, serial: string) => {
+    setRegisteredDevices((prev) => [...prev, { name, serial }]);
+  };
+
   // Sum of quantities for cart indicator
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <>
-      <Navbar cartCount={cartCount} onOpenCart={() => setIsCartOpen(true)} />
+      <Navbar 
+        cartCount={cartCount} 
+        onOpenCart={() => setIsCartOpen(true)} 
+        onOpenProfile={() => setIsProfileOpen(true)}
+      />
       
       <main style={{ marginTop: '80px' }}>
         <Hero />
@@ -69,6 +86,13 @@ export default function Home() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
         onClearCart={handleClearCart}
+      />
+
+      <ProfileDrawer
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        registeredDevices={registeredDevices}
+        onRegisterDevice={handleRegisterDevice}
       />
     </>
   );
