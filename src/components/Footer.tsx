@@ -96,6 +96,16 @@ export default function Footer() {
             <li className={styles.linkItem}>Warranty & Repair</li>
             <li className={styles.linkItem}>Returns & Exchanges</li>
             <li className={styles.linkItem}>Contact Sales</li>
+            <li className={styles.linkItem}>
+              <a 
+                href="https://github.com/Telzeez" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ color: 'inherit', textDecoration: 'none' }}
+              >
+                GitHub (Built by Abdlazeez)
+              </a>
+            </li>
           </ul>
         </div>
 
