@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Sarah Jenkins",
+    "role": "Acoustic Analyst",
+    "quote": "The active noise cancellation is a total game changer. It completely isolates aircraft hum while retaining the full clarity and depth of my acoustic mixes. Pure brilliance.",
+    "rating": 5,
+    "image": "/images/user_profile_1.png",
+    "date": "2026-05-20T10:00:00.000Z",
+    "userId": "seed-1"
+  },
+  {
+    "id": "2",
+    "name": "Marcus Thorne",
+    "role": "Music Producer",
+    "quote": "Unbelievable battery life. I only charge it once a week, despite using it for long mixing sessions. The spatial audio tracking makes me feel like I am in the center of the recording studio.",
+    "rating": 5,
+    "image": "/images/user_profile_2.png",
+    "date": "2026-05-22T14:30:00.000Z",
+    "userId": "seed-2"
+  },
+  {
+    "id": "3",
+    "name": "Elena Rostova",
+    "role": "UX Designer",
+    "quote": "The space-black finish with copper accents is simply gorgeous. They look like a piece of high-end jewelry and feel incredibly light on the head, even after hours of continuous wear.",
+    "rating": 5,
+    "image": "/images/user_profile_1.png",
+    "date": "2026-05-25T09:15:00.000Z",
+    "userId": "seed-3"
+  }
+]

@@ -121,7 +121,7 @@ export default function Home() {
         <Showcase onAddToBasket={handleAddToCart} />
         <SpatialAudio />
         <CountdownOffer onGetOffer={handleAddToCart} />
-        <Testimonials />
+        <Testimonials user={user} onOpenProfile={() => setIsProfileOpen(true)} />
       </main>
 
       <Footer />
