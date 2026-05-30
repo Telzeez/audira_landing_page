@@ -120,7 +120,7 @@ export default function Home() {
         <ProductsGrid onAddToCart={handleAddToCart} />
         <Showcase onAddToBasket={handleAddToCart} />
         <SpatialAudio />
-        <CountdownOffer />
+        <CountdownOffer onGetOffer={handleAddToCart} />
         <Testimonials />
       </main>
 
@@ -133,6 +133,7 @@ export default function Home() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
         onClearCart={handleClearCart}
+        user={user}
       />
 
       <ProfileDrawer

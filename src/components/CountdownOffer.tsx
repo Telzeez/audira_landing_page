@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './CountdownOffer.module.css';
 
-export default function CountdownOffer() {
+interface CountdownOfferProps {
+  onGetOffer: (item: { id: string; name: string; price: number; priceStr: string; image: string }) => void;
+}
+
+export default function CountdownOffer({ onGetOffer }: CountdownOfferProps) {
   // Set initial countdown target: 10 days from now
   const [timeLeft, setTimeLeft] = useState({
     days: '10',
@@ -83,7 +87,16 @@ export default function CountdownOffer() {
             </div>
           </div>
 
-          <button className={`btn-primary ${styles.ctaBtn}`}>
+          <button 
+            className={`btn-primary ${styles.ctaBtn}`}
+            onClick={() => onGetOffer({ 
+              id: 'aurum-promo', 
+              name: 'Audira Aurum (Flash Promo)', 
+              price: 85.00, 
+              priceStr: '$85.00', 
+              image: '/images/product_aurum_copper.png' 
+            })}
+          >
             Get The Offer
           </button>
         </div>
