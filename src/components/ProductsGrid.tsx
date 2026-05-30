@@ -70,10 +70,19 @@ const categories = ['All', 'Over-Ear', 'In-Ear', 'Special Edition'] as const;
 
 export default function ProductsGrid({ onAddToCart }: ProductsGridProps) {
   const [selectedCategory, setSelectedCategory] = useState<typeof categories[number]>('All');
+  const [showAll, setShowAll] = useState(false);
+
+  const handleCategoryChange = (cat: typeof categories[number]) => {
+    setSelectedCategory(cat);
+    setShowAll(false); // Reset list size toggle on category changes
+  };
 
   const filteredProducts = selectedCategory === 'All' 
     ? products 
     : products.filter(p => p.category === selectedCategory);
+
+  const canExpand = filteredProducts.length > 3;
+  const visibleProducts = showAll ? filteredProducts : filteredProducts.slice(0, 3);
 
   return (
     <section id="products-catalog" className={styles.section}>
@@ -82,13 +91,26 @@ export default function ProductsGrid({ onAddToCart }: ProductsGridProps) {
           <span className={styles.sub}>Exclusive Collection</span>
           <h2 className={styles.title}>Intelligent Sound, Refined Design</h2>
         </div>
-        <button className={styles.viewAll}>
-          <span>View All</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </svg>
-        </button>
+        {canExpand && (
+          <button className={styles.viewAll} onClick={() => setShowAll(!showAll)}>
+            <span>{showAll ? 'Show Less' : 'View All'}</span>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              style={{ transform: showAll ? 'rotate(-90deg)' : 'none', transition: 'transform 0.3s' }}
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Category Tabs Filter Bar */}
@@ -97,7 +119,7 @@ export default function ProductsGrid({ onAddToCart }: ProductsGridProps) {
           <button
             key={cat}
             className={`${styles.filterTab} ${selectedCategory === cat ? styles.filterTabActive : ''}`}
-            onClick={() => setSelectedCategory(cat)}
+            onClick={() => handleCategoryChange(cat)}
           >
             {cat}
           </button>
@@ -106,7 +128,7 @@ export default function ProductsGrid({ onAddToCart }: ProductsGridProps) {
 
       {/* Products Grid */}
       <div className={styles.grid}>
-        {filteredProducts.map((product) => (
+        {visibleProducts.map((product) => (
           /* key includes selectedCategory to force remount & animation triggers on filter changes */
           <div key={`${selectedCategory}-${product.id}`} className={`${styles.card} ${styles.animateCard}`}>
             <div className={styles.imageWrapper}>
