@@ -1,0 +1,19 @@
+.switcher {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.localeBtn {
+  font-size: 0.875rem;
+  color: #a0a0a0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 500;
+}
+
+.localeBtn:hover,
+.active {
+  color: #fff;
+  text-decoration: underline;
+}

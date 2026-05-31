@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
+
+// The supported locales from your i18n config (keep in sync with src/i18n/routing.ts)
+const SUPPORTED_LOCALES = ['en', 'fr', 'de']; // 'jp' is not in routing, will show toast
 
 interface NavbarProps {
   cartCount: number;
@@ -10,48 +14,60 @@ interface NavbarProps {
 }
 
 export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarProps) {
+  const router = useRouter();
+  const pathname = usePathname(); // e.g., "/en/products" or "/fr"
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState('EN');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Derive current locale from pathname
+  const currentLocale = pathname.split('/')[1] || 'en'; // fallback to 'en'
+  const displayLang = currentLocale.toUpperCase();
+useEffect(() => {
+  console.log('isLangOpen changed to:', isLangOpen);
+}, [isLangOpen]);
+  // Scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 20);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleLang = () => setIsLangOpen(!isLangOpen);
-  const selectLang = (lang: string) => {
-    if (lang !== 'EN') {
-      const fullLangs: Record<string, string> = {
-        FR: 'French',
-        DE: 'German',
-        JP: 'Japanese'
-      };
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
-      }
-      setToastMessage(`Coming Soon: ${fullLangs[lang] || lang} translation is under development.`);
-      toastTimerRef.current = setTimeout(() => {
-        setToastMessage(null);
-      }, 4000);
+  // Helper to change language
+    // Helper to change language
+  const switchToLocale = (locale: string) => {
+    // Check if the locale is actually supported in your routing
+    if (!SUPPORTED_LOCALES.includes(locale)) {
+      // Show coming soon toast for unsupported locales (like JP)
+      const fullNames: Record<string, string> = { fr: 'French', de: 'German', jp: 'Japanese' };
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      setToastMessage(`Coming Soon: ${fullNames[locale] || locale.toUpperCase()} translation is under development.`);
+      toastTimerRef.current = setTimeout(() => setToastMessage(null), 4000);
       setIsLangOpen(false);
       return;
     }
-    setSelectedLang(lang);
+
+    // If locale is supported, set cookie and redirect
+    // 1. Set cookie with max-age 1 year
+    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+    
+    // 2. Build new path: replace the first segment of the pathname with the new locale
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length > 0 && SUPPORTED_LOCALES.includes(segments[0])) {
+      segments[0] = locale;
+    } else {
+      segments.unshift(locale);
+    }
+    const newPath = '/' + segments.join('/');
+    router.push(newPath);
     setIsLangOpen(false);
   };
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleLang = () => setIsLangOpen(!isLangOpen);
 
   const scrollToSection = (id: string) => {
     setIsMenuOpen(false);
@@ -60,12 +76,8 @@ export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarP
     } else {
       const element = document.getElementById(id);
       if (element) {
-        const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-        const offsetPosition = elementPosition - 80; // offset navbar height
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        });
+        const offsetPosition = element.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       }
     }
   };
@@ -100,7 +112,7 @@ export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarP
             <line x1="2" y1="12" x2="22" y2="12" />
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
           </svg>
-          <span>{selectedLang}</span>
+          <span>{displayLang}</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="12"
@@ -116,11 +128,11 @@ export default function Navbar({ cartCount, onOpenCart, onOpenProfile }: NavbarP
             <polyline points="6 9 12 15 18 9" />
           </svg>
 
-          <div className={`${styles.langDropdown} ${isLangOpen ? styles.langDropdownActive : ''} ${isLangOpen ? styles.active : ''}`}>
-            <div className={styles.langOption} onClick={() => selectLang('EN')}>EN</div>
-            <div className={styles.langOption} onClick={() => selectLang('FR')}>FR</div>
-            <div className={styles.langOption} onClick={() => selectLang('DE')}>DE</div>
-            <div className={styles.langOption} onClick={() => selectLang('JP')}>JP</div>
+          <div className={`${styles.langDropdown} ${isLangOpen ? styles.langDropdownActive : ''}`}>
+            <div className={styles.langOption} onClick={() => switchToLocale('en')}>EN</div>
+            <div className={styles.langOption} onClick={() => switchToLocale('fr')}>FR</div>
+            <div className={styles.langOption} onClick={() => switchToLocale('de')}>DE</div>
+            <div className={styles.langOption} onClick={() => switchToLocale('jp')}>JP</div>
           </div>
         </div>
 

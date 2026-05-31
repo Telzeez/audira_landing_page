@@ -364,9 +364,13 @@
 }
 
 .formRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;  /* Allows wrapping on mobile */
+}
+.formRow .formGroup {
+  flex: 1;
+  min-width: 120px;
 }
 
 .orderSummaryBox {
@@ -466,9 +470,56 @@
   padding: 12px 20px;
   letter-spacing: 1px;
 }
+.authRequiredBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(226, 122, 63, 0.15);
+  border-left: 3px solid var(--accent-color);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.authButton {
+  margin-left: auto;
+  background: var(--accent-gradient);
+  border: none;
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+/* Ensure all inputs take full width and don't overflow */
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  /* Keep your existing padding, background, border, etc. */
+}
+
+.authButton:hover {
+  opacity: 0.9;
+}
 
 @media (max-width: 480px) {
   .drawer {
     max-width: 100%;
   }
 }
+
+/* On small screens, stack the fields vertically */
+@media (max-width: 640px) {
+  .formRow {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .formRow .formGroup {
+    width: 100%;
+  }
+}
+
