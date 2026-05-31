@@ -16,7 +16,7 @@ function getLocale(request: NextRequest): string {
   }
 
   // 2. Check cookie
-  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value as "en" | "de" | "fr";
   if (cookieLocale && i18n.locales.includes(cookieLocale)) {
     return cookieLocale;
   }
