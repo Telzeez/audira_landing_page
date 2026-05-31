@@ -64,6 +64,7 @@
   -ms-overflow-style: none; /* IE 10+ */
   scroll-behavior: smooth;
   cursor: grab;
+  justify-content: center;
 }
 
 .scrollContainer::-webkit-scrollbar {
@@ -79,9 +80,15 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: stretch;
   min-height: 280px;
   transition: var(--transition-smooth);
   position: relative;
+}
+
+.scrollContainer > :only-child.card {
+  flex: 0 0 500px;
+  margin: 0 auto;
 }
 
 .card::before {
@@ -352,16 +359,39 @@
   transition: var(--transition-fast);
 }
 
-.authPromptLink:hover {
+.emptyReviewCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  text-align: center;
   color: #ffffff;
+  width: 100%;
 }
 
-/* Pagination Dots */
-.paginationDots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
+.emptyReviewCard h3 {
+  font-family: var(--font-outfit);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.emptyReviewCard p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.emptyReviewCard .btn-primary {
+  margin-top: 12px;
+  width: auto;
+  max-width: 100%;
 }
 
 .dot {
@@ -371,6 +401,7 @@
   background: rgba(255, 255, 255, 0.15);
   cursor: pointer;
   transition: var(--transition-fast);
+  border: none;
 }
 
 .dotActive {
@@ -409,9 +440,19 @@
     font-size: 2.2rem;
   }
   
+  .scrollContainer {
+    justify-content: flex-start;
+  }
+  
   .card {
-    flex: 0 0 300px;
+    flex: 0 0 calc(100vw - 48px);
     padding: 24px;
+    min-height: 350px;
+  }
+  
+  .scrollContainer > :only-child.card {
+    flex: 0 0 calc(100vw - 48px);
+    margin: 0;
   }
   
   .quoteText {
@@ -420,5 +461,33 @@
 
   .reviewFormContainer {
     padding: 20px;
+  }
+
+  .emptyReviewCard h3 {
+    font-size: 1.1rem;
+  }
+
+  .emptyReviewCard p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    flex: 0 0 calc(100vw - 32px);
+    padding: 20px;
+    min-height: 320px;
+  }
+
+  .scrollContainer > :only-child.card {
+    flex: 0 0 calc(100vw - 32px);
+  }
+
+  .emptyReviewCard h3 {
+    font-size: 1rem;
+  }
+
+  .emptyReviewCard p {
+    font-size: 0.85rem;
   }
 }
