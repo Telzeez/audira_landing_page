@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import styles from './Hero.module.css';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import styles from "./Hero.module.css";
 
 function SlotCounter({ numStr }: { numStr: string }) {
   const [mounted, setMounted] = useState(false);
@@ -14,7 +14,7 @@ function SlotCounter({ numStr }: { numStr: string }) {
 
   return (
     <span className={styles.slotContainer}>
-      {numStr.split('').map((char, index) => {
+      {numStr.split("").map((char, index) => {
         const isDigit = /\d/.test(char);
         if (!isDigit) {
           return <span key={index}>{char}</span>;
@@ -48,9 +48,9 @@ function SlotCounter({ numStr }: { numStr: string }) {
 
 export default function Hero() {
   const scrollToProducts = () => {
-    const productsSection = document.getElementById('products-catalog');
+    const productsSection = document.getElementById("products-catalog");
     if (productsSection) {
-      productsSection.scrollIntoView({ behavior: 'smooth' });
+      productsSection.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -63,17 +63,27 @@ export default function Hero() {
             Q20
             <span>Premium Series</span>
           </h1>
-          <p className={styles.desc}>
-            Hybrid Active Noise Cancelling Headphones, Designed To Deliver Pure Audio And Deep Immersion Wherever You Are. Equipped With Advanced Hybrid ANC Technology.
-          </p>
-          <button className={`btn-primary ${styles.heroCta}`} onClick={scrollToProducts}>
+          <button
+            className={`btn-primary ${styles.heroPrimary} ${styles.heroCta}`}
+            onClick={scrollToProducts}
+          >
             Explore Q20
           </button>
+          <p className={styles.desc}>
+            Hybrid Active Noise Cancelling Headphones, Designed To Deliver Pure
+            Audio And Deep Immersion Wherever You Are. Equipped With Advanced
+            Hybrid ANC Technology.
+          </p>
         </div>
 
         <div className={styles.barcodeWrapper}>
           {/* Custom SVG Barcode */}
-          <svg className={styles.barcode} height="40" viewBox="0 0 160 40" fill="currentColor">
+          <svg
+            className={styles.barcode}
+            height="40"
+            viewBox="0 0 160 40"
+            fill="currentColor"
+          >
             <rect x="0" width="3" height="40" />
             <rect x="5" width="1" height="40" />
             <rect x="8" width="2" height="40" />
@@ -113,7 +123,10 @@ export default function Hero() {
             <rect x="155" width="2" height="40" />
             <rect x="159" width="1" height="40" />
           </svg>
-          <div className={styles.barcodeText}>(01)<SlotCounter numStr="01234567890123" /></div>
+          <div className={styles.barcodeText}>
+            (01)
+            <SlotCounter numStr="01234567890123" />
+          </div>
         </div>
       </div>
 
@@ -139,7 +152,13 @@ export default function Hero() {
         <div className={styles.ratingSection}>
           <div className={styles.stars}>
             {[...Array(5)].map((_, i) => (
-              <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                key={i}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
             ))}
@@ -158,7 +177,17 @@ export default function Hero() {
         <div className={styles.specsList}>
           <div className={styles.specItem}>
             <span className={styles.specIcon}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="2" width="20" height="24" rx="2" ry="2" />
                 <path d="M12 2v20M17 5H7M17 19H7M17 12H7" />
               </svg>
@@ -171,7 +200,17 @@ export default function Hero() {
 
           <div className={styles.specItem}>
             <span className={styles.specIcon}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
               </svg>
             </span>
@@ -184,7 +223,18 @@ export default function Hero() {
 
         <div className={styles.ctaLink} onClick={scrollToProducts}>
           <span>See The Product</span>
-          <svg className={styles.ctaArrow} xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            className={styles.ctaArrow}
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="5" y1="12" x2="19" y2="12" />
             <polyline points="12 5 19 12 12 19" />
           </svg>

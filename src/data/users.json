@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "name": "Abdlazeez",
+    "email": "Abdlazeezolasunkanmi@gmail.com",
+    "passwordHash": "38b9a6d49c8c4f46ca4e86624d51e142ec25bb15190819751eb7fd017d56becfa24ed13114c24755ff644b115a67f2b7a7aca67bfd7608840464286330a511fd",
+    "passwordSalt": "ab55bee0b4909bb979c2a15a1d214060",
+    "id": "ba0efc6d-9da8-4fc3-9bb0-8d18372968ac",
+    "points": 120,
+    "registeredDevices": [
+      {
+        "name": "Audira Q20",
+        "serial": "(01)01234567890123"
+      }
+    ]
+  }
+]

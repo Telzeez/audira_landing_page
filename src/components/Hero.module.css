@@ -150,6 +150,13 @@
   text-transform: uppercase;
 }
 
+.heroPrimary {
+  font-size: 1.1rem;
+  padding: 16px 40px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 20px rgba(226, 122, 63, 0.35);
+}
+
 /* Right Column Styling */
 .rightCol {
   border-left: 1px solid rgba(255, 255, 255, 0.05);
